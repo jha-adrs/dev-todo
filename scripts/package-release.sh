@@ -15,6 +15,12 @@ set -euo pipefail
 : "${VERSION:?VERSION env var required (e.g. v1.2.3)}"
 : "${PLATFORM:?PLATFORM env var required (e.g. linux-x64)}"
 
+# Must run from the repo root — all source paths below are relative.
+if [[ ! -f package.json || ! -d server || ! -d client ]]; then
+  echo "Error: run this script from the repo root (package.json, server/, client/ must be present)" >&2
+  exit 1
+fi
+
 STAGING_NAME="devtodo-${VERSION}-${PLATFORM}"
 STAGING_DIR="dist-release/${STAGING_NAME}"
 TARBALL="dist-release/${STAGING_NAME}.tar.gz"
@@ -32,12 +38,12 @@ mkdir -p "${STAGING_DIR}/client"
 cp -r client/dist "${STAGING_DIR}/client/dist"
 
 echo "→ Copying node_modules (prod only)"
+# cp -R: preserves symlinks as symlinks on both BSD (macOS) and GNU (Linux) cp.
+# That means node_modules/client → ../client and node_modules/server → ../server
+# survive the copy as symlinks — tar would then follow them and pull the whole
+# workspace source tree into the tarball. The `rm -rf` below is what actually
+# prevents the leak; the `-R` flag alone is NOT sufficient. Do not remove either.
 cp -R node_modules "${STAGING_DIR}/node_modules"
-
-# Remove workspace entries (symlinks/copies of the client and server workspace roots).
-# npm workspaces creates these, but the running server never imports from them;
-# without this cleanup, macOS cp dereferences the symlinks and leaks source into
-# the tarball. Safe and desirable to strip on both macOS and Linux.
 rm -rf "${STAGING_DIR}/node_modules/client" "${STAGING_DIR}/node_modules/server"
 
 echo "→ Copying launcher and metadata"
