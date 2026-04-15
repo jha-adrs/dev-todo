@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # DevTodo release runtime launcher — ships inside the release tarball.
 # Idempotent: safe to re-run after an upgrade. Preserves existing .env and data/.
-set -e
+set -euo pipefail
 
 # ─── 1. Require Node.js 20+ ──────────────────────────────────────────
 if ! command -v node >/dev/null 2>&1; then
