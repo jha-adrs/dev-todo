@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+data/
+uploads/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+.DS_Store
+.superpowers/

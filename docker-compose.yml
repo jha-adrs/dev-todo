@@ -1,0 +1,19 @@
+services:
+  devtodo:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - data:/app/data
+      - uploads:/app/uploads
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-changeme-generate-a-real-secret}
+      - DB_PROVIDER=sqlite
+      - DB_PATH=/app/data/devtodo.db
+      - STORAGE_PROVIDER=local
+      - PORT=3000
+    restart: unless-stopped
+
+volumes:
+  data:
+  uploads:
