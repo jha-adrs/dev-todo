@@ -7,7 +7,7 @@ services:
       - data:/app/data
       - uploads:/app/uploads
     environment:
-      - JWT_SECRET=${JWT_SECRET:-changeme-generate-a-real-secret}
+      - JWT_SECRET=${JWT_SECRET:?Missing JWT_SECRET — set it in .env or env. Generate with: openssl rand -hex 32}
       - DB_PROVIDER=sqlite
       - DB_PATH=/app/data/devtodo.db
       - STORAGE_PROVIDER=local

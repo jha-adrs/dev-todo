@@ -44,8 +44,8 @@ Every todo is scoped to today. Unfinished items roll over as backlog. Multiple w
 ### With Docker (recommended)
 
 ```bash
-git clone https://github.com/<your-user>/devtodo.git
-cd devtodo
+git clone https://github.com/jha-adrs/dev-todo.git
+cd dev-todo
 docker compose up -d
 ```
 
@@ -54,8 +54,8 @@ App at **http://localhost:3000**. First visit creates your password.
 ### Without Docker
 
 ```bash
-git clone https://github.com/<your-user>/devtodo.git
-cd devtodo
+git clone https://github.com/jha-adrs/dev-todo.git
+cd dev-todo
 ./setup.sh
 ```
 
@@ -79,8 +79,8 @@ Vite (5173) + Express (3000) with hot reload.
    ```
 3. **Clone & start:**
    ```bash
-   git clone https://github.com/<your-user>/devtodo.git
-   cd devtodo
+   git clone https://github.com/jha-adrs/dev-todo.git
+   cd dev-todo
    echo "JWT_SECRET=$(openssl rand -hex 32)" > .env
    docker compose up -d
    ```
@@ -103,7 +103,7 @@ Caddy auto-provisions Let's Encrypt SSL. Done.
 ### Updating
 
 ```bash
-cd devtodo && git pull && docker compose up -d --build
+cd dev-todo && git pull && docker compose up -d --build
 ```
 
 Data persists in Docker volumes (`data` for SQLite, `uploads` for files).
