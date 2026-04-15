@@ -1,1 +1,30 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/components/calendarsidebar.tsx","./src/components/commandpalette.tsx","./src/components/detailpanel.tsx","./src/components/emptystate.tsx","./src/components/loginpage.tsx","./src/components/progressring.tsx","./src/components/richtexteditor.tsx","./src/components/themetoggle.tsx","./src/components/todoitem.tsx","./src/components/todolist.tsx","./src/hooks/useauth.ts","./src/hooks/usetodos.ts","./src/lib/api.ts","./src/lib/theme.ts"],"version":"5.9.3"}
+{
+    "root": [
+        "./src/app.tsx",
+        "./src/main.tsx",
+        "./src/components/calendarsidebar.tsx",
+        "./src/components/commandpalette.tsx",
+        "./src/components/dbexplorer.tsx",
+        "./src/components/detailpanel.tsx",
+        "./src/components/emptystate.tsx",
+        "./src/components/loginpage.tsx",
+        "./src/components/priorityicon.tsx",
+        "./src/components/progressring.tsx",
+        "./src/components/richtexteditor.tsx",
+        "./src/components/settingspage.tsx",
+        "./src/components/snoozepopover.tsx",
+        "./src/components/spaceswitcher.tsx",
+        "./src/components/tagchip.tsx",
+        "./src/components/tagselector.tsx",
+        "./src/components/themetoggle.tsx",
+        "./src/components/todoitem.tsx",
+        "./src/components/todolist.tsx",
+        "./src/contexts/spacecontext.tsx",
+        "./src/hooks/useauth.ts",
+        "./src/hooks/usetodos.ts",
+        "./src/lib/api.ts",
+        "./src/lib/notifications.ts",
+        "./src/lib/theme.ts"
+    ],
+    "version": "5.9.3"
+}
