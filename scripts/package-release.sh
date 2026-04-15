@@ -32,7 +32,13 @@ mkdir -p "${STAGING_DIR}/client"
 cp -r client/dist "${STAGING_DIR}/client/dist"
 
 echo "→ Copying node_modules (prod only)"
-cp -r node_modules "${STAGING_DIR}/node_modules"
+cp -R node_modules "${STAGING_DIR}/node_modules"
+
+# Remove workspace entries (symlinks/copies of the client and server workspace roots).
+# npm workspaces creates these, but the running server never imports from them;
+# without this cleanup, macOS cp dereferences the symlinks and leaks source into
+# the tarball. Safe and desirable to strip on both macOS and Linux.
+rm -rf "${STAGING_DIR}/node_modules/client" "${STAGING_DIR}/node_modules/server"
 
 echo "→ Copying launcher and metadata"
 cp scripts/run.sh "${STAGING_DIR}/run.sh"
@@ -56,6 +62,9 @@ Config is in .env (generated on first run).
 Your data lives in ./data/ and ./uploads/.
 See https://github.com/jha-adrs/dev-todo for docs.
 EOF
+
+echo "→ Filtering macOS noise files"
+find "${STAGING_DIR}" -name ".DS_Store" -delete
 
 echo "→ Creating tarball"
 # Use a deterministic-ish tar: sort entries, fixed mtime would need GNU tar extras.
