@@ -6,6 +6,7 @@ set -e
 #   ./setup.sh                        # full install + start (production)
 #   ./setup.sh --dev                  # dev mode with hot reload
 #   ./setup.sh --no-install-node      # skip auto-install of Node/nvm
+#   ./setup.sh --with-swap            # create 2GB swap file if missing (low-RAM VPS)
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -19,10 +20,12 @@ NODE_INSTALL_VERSION="20"  # latest LTS at time of writing
 
 DEV_MODE=false
 INSTALL_NODE=true
+WITH_SWAP=false
 for arg in "$@"; do
   case $arg in
     --dev) DEV_MODE=true ;;
     --no-install-node) INSTALL_NODE=false ;;
+    --with-swap) WITH_SWAP=true ;;
   esac
 done
 
@@ -60,6 +63,29 @@ install_nvm_and_node() {
   nvm alias default "$NODE_INSTALL_VERSION" >/dev/null 2>&1
   echo -e "${GREEN}✓${NC} Node.js $(node -v) installed"
 }
+
+# ─── Step 0: Optional swap (--with-swap) ───────────────────────────
+
+if [ "$WITH_SWAP" = true ]; then
+  if swapon --show 2>/dev/null | grep -q '^/'; then
+    echo -e "${GREEN}✓${NC} Swap already active, skipping"
+  else
+    echo -e "${BLUE}→${NC} Creating 2GB swap file..."
+    if sudo fallocate -l 2G /swapfile 2>/dev/null; then
+      :
+    else
+      # fallocate not supported (e.g. some filesystems) — fall back to dd
+      sudo dd if=/dev/zero of=/swapfile bs=1M count=2048 status=none
+    fi
+    sudo chmod 600 /swapfile
+    sudo mkswap /swapfile >/dev/null
+    sudo swapon /swapfile
+    if ! grep -q '^/swapfile' /etc/fstab; then
+      echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab >/dev/null
+    fi
+    echo -e "${GREEN}✓${NC} 2GB swap active and persistent across reboots"
+  fi
+fi
 
 # ─── Step 1: Node.js ───────────────────────────────────────────────
 
