@@ -1,0 +1,157 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write  # needed by softprops/action-gh-release to create releases
+
+jobs:
+  build:
+    name: Build ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux-x64
+            runner: ubuntu-24.04
+          - platform: linux-arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install build deps and build
+        run: |
+          npm ci
+          npm run build
+
+      - name: Reinstall prod-only deps for target platform
+        run: |
+          rm -rf node_modules
+          npm ci --omit=dev
+
+      - name: Assemble release tarball
+        env:
+          VERSION: ${{ github.ref_name }}
+          PLATFORM: ${{ matrix.platform }}
+        run: ./scripts/package-release.sh
+
+      - name: Upload tarball artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: devtodo-${{ github.ref_name }}-${{ matrix.platform }}
+          path: |
+            dist-release/devtodo-${{ github.ref_name }}-${{ matrix.platform }}.tar.gz
+            dist-release/devtodo-${{ github.ref_name }}-${{ matrix.platform }}.tar.gz.sha256
+          if-no-files-found: error
+          retention-days: 7
+
+  smoke-test:
+    name: Smoke test (linux-x64)
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Download x64 tarball
+        uses: actions/download-artifact@v4
+        with:
+          name: devtodo-${{ github.ref_name }}-linux-x64
+          path: ./_artifact
+
+      - name: Extract and start server
+        run: |
+          mkdir -p _smoke
+          tar -xzf _artifact/devtodo-${{ github.ref_name }}-linux-x64.tar.gz -C _smoke
+          cd _smoke/devtodo-${{ github.ref_name }}-linux-x64
+          ./run.sh > server.log 2>&1 &
+          echo $! > server.pid
+          cd ../..
+
+      - name: Wait for /api/health
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000/api/health > /dev/null; then
+              echo "✓ Health check passed on attempt $i"
+              curl -s http://localhost:3000/api/health
+              echo ""
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "✗ Health check failed after 30s"
+          echo "--- server log ---"
+          cat _smoke/devtodo-${{ github.ref_name }}-linux-x64/server.log || true
+          exit 1
+
+      - name: Verify migrations created DB
+        run: |
+          test -f _smoke/devtodo-${{ github.ref_name }}-linux-x64/data/devtodo.db
+          echo "✓ SQLite DB created"
+
+      - name: Verify idempotency (re-run run.sh)
+        run: |
+          cd _smoke/devtodo-${{ github.ref_name }}-linux-x64
+          kill "$(cat server.pid)" || true
+          sleep 2
+          # Capture .env mtime before re-run
+          ENV_BEFORE=$(stat -c %Y .env)
+          ./run.sh > server2.log 2>&1 &
+          echo $! > server.pid
+          sleep 3
+          ENV_AFTER=$(stat -c %Y .env)
+          if [ "$ENV_BEFORE" != "$ENV_AFTER" ]; then
+            echo "✗ .env was regenerated on second run"
+            exit 1
+          fi
+          echo "✓ .env preserved across re-run"
+          # Second-run health check
+          for i in $(seq 1 15); do
+            if curl -sf http://localhost:3000/api/health > /dev/null; then
+              echo "✓ Second-run health check passed"
+              kill "$(cat server.pid)" || true
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "✗ Second-run health check failed"
+          cat server2.log
+          exit 1
+
+  release:
+    name: Publish GitHub Release
+    needs: [build, smoke-test]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./_artifacts
+
+      - name: List downloaded files
+        run: find ./_artifacts -type f | sort
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            ./_artifacts/**/*.tar.gz
+            ./_artifacts/**/*.tar.gz.sha256
+          fail_on_unmatched_files: true
