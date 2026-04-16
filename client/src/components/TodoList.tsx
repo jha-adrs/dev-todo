@@ -22,6 +22,7 @@ interface TodoListProps {
   onDeleteTodo: (id: number) => void;
   onToggleCalendar?: () => void;
   onOpenSettings?: () => void;
+  onSwitchToNotes?: () => void;
   focusedIndex?: number;
   setFocusedIndex?: (idx: number | ((prev: number) => number)) => void;
   listRef?: React.RefObject<HTMLDivElement | null>;
@@ -41,6 +42,7 @@ export default function TodoList({
   onDeleteTodo,
   onToggleCalendar,
   onOpenSettings,
+  onSwitchToNotes,
   focusedIndex: externalFocusedIndex,
   setFocusedIndex: externalSetFocusedIndex,
   listRef,
@@ -156,6 +158,28 @@ export default function TodoList({
             overflow: "hidden",
           }}
         >
+          {onSwitchToNotes && (
+            <button
+              onClick={onSwitchToNotes}
+              title="Notes"
+              style={{
+                padding: "6px 12px",
+                backgroundColor: "var(--bg-card)",
+                border: "none",
+                borderRight: "1px solid var(--border)",
+                borderRadius: 0,
+                color: "var(--text-secondary)",
+                fontSize: "12px",
+                fontWeight: 500,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              Notes
+            </button>
+          )}
           {onToggleCalendar && (
             <button
               onClick={onToggleCalendar}

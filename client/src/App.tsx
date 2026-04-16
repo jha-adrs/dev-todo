@@ -478,6 +478,7 @@ function AuthenticatedApp({
               onDeleteTodo={deleteTodo}
               onToggleCalendar={() => setCalendarOpen(!calendarOpen)}
               onOpenSettings={() => setShowSettings(true)}
+              onSwitchToNotes={() => { setView("notes"); setSelectedTodoId(null); }}
               focusedIndex={focusedIndex}
               setFocusedIndex={setFocusedIndex}
               listRef={listRef}
@@ -495,6 +496,7 @@ function AuthenticatedApp({
                 setSelectedNoteId(note.id);
                 return note;
               }}
+              onSwitchToTodos={() => { setView("todos"); setSelectedNoteId(null); }}
             />
           )}
         </div>

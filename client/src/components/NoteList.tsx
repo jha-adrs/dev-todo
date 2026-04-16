@@ -29,6 +29,7 @@ interface NoteListProps {
   selectedNoteId: number | null;
   onSelectNote: (id: number | null) => void;
   onCreateNote: () => Promise<Note>;
+  onSwitchToTodos?: () => void;
 }
 
 export default function NoteList({
@@ -39,6 +40,7 @@ export default function NoteList({
   selectedNoteId,
   onSelectNote,
   onCreateNote,
+  onSwitchToTodos,
 }: NoteListProps) {
   const pinnedNotes = notes.filter((n) => n.pinned === 1);
   const regularNotes = notes.filter((n) => n.pinned !== 1);
@@ -96,6 +98,28 @@ export default function NoteList({
             overflow: "hidden",
           }}
         >
+          {onSwitchToTodos && (
+            <button
+              onClick={onSwitchToTodos}
+              title="Back to Todos"
+              style={{
+                padding: "6px 12px",
+                backgroundColor: "var(--bg-card)",
+                border: "none",
+                borderRight: "1px solid var(--border)",
+                borderRadius: 0,
+                color: "var(--text-secondary)",
+                fontSize: "12px",
+                fontWeight: 500,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              Todos
+            </button>
+          )}
           <button
             onClick={onToggleArchived}
             title={showArchived ? "Hide archived" : "Show archived"}
