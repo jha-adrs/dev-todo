@@ -1,3 +1,4 @@
+import { motion } from "motion/react";
 import { Target, Coffee } from "lucide-react";
 
 interface EmptyStateProps {
@@ -8,20 +9,31 @@ export default function EmptyState({ allCompleted }: EmptyStateProps) {
   if (allCompleted) {
     return (
       <div style={{ textAlign: "center", padding: "60px 20px" }}>
-        <div
+        <motion.div
+          animate={{ y: [0, -6, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
           style={{
             width: "56px",
             height: "56px",
-            borderRadius: "16px",
-            backgroundColor: "rgba(34, 197, 94, 0.1)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
             margin: "0 auto 14px",
           }}
         >
-          <Target size={28} color="var(--color-green)" />
-        </div>
+          <motion.div
+            animate={{ scale: [1, 1.05, 1], opacity: [0.8, 1, 0.8] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            style={{
+              width: "56px",
+              height: "56px",
+              borderRadius: "16px",
+              backgroundColor: "rgba(34, 197, 94, 0.1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Target size={28} color="var(--color-green)" />
+          </motion.div>
+        </motion.div>
         <div
           style={{
             fontSize: "18px",
@@ -47,7 +59,9 @@ export default function EmptyState({ allCompleted }: EmptyStateProps) {
 
   return (
     <div style={{ textAlign: "center", padding: "60px 20px" }}>
-      <div
+      <motion.div
+        animate={{ y: [0, -6, 0] }}
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         style={{
           width: "56px",
           height: "56px",
@@ -60,7 +74,7 @@ export default function EmptyState({ allCompleted }: EmptyStateProps) {
         }}
       >
         <Coffee size={28} color="var(--color-primary-light)" />
-      </div>
+      </motion.div>
       <div
         style={{
           fontSize: "18px",
@@ -78,7 +92,7 @@ export default function EmptyState({ allCompleted }: EmptyStateProps) {
           marginTop: "6px",
         }}
       >
-        press N to start planning
+        type above or press ⌘K
       </div>
     </div>
   );

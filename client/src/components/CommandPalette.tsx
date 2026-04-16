@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { Search } from "lucide-react";
 import type { Todo } from "../hooks/useTodos";
 
 interface CommandAction {
@@ -148,129 +150,158 @@ export default function CommandPalette({
     }
   }
 
-  if (!open) return null;
-
   return (
-    <div
-      onClick={onClose}
-      style={{
-        position: "fixed",
-        inset: 0,
-        backgroundColor: "rgba(0,0,0,0.5)",
-        backdropFilter: "blur(4px)",
-        display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "center",
-        paddingTop: "20vh",
-        zIndex: 100,
-      }}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        onKeyDown={handleKeyDown}
-        style={{
-          width: "100%",
-          maxWidth: "500px",
-          backgroundColor: "var(--bg-card)",
-          border: "1px solid var(--border)",
-          borderRadius: "12px",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.4)",
-          overflow: "hidden",
-        }}
-      >
-        {/* Search input */}
-        <div
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+          onClick={onClose}
           style={{
-            padding: "14px 16px",
-            borderBottom: "1px solid var(--border)",
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            backdropFilter: "blur(4px)",
             display: "flex",
-            alignItems: "center",
-            gap: "10px",
+            alignItems: "flex-start",
+            justifyContent: "center",
+            paddingTop: "20vh",
+            zIndex: 100,
           }}
         >
-          <span style={{ color: "var(--text-muted)", fontSize: "14px" }}>⌘</span>
-          <input
-            ref={inputRef}
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search or type a command..."
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+            transition={{ duration: 0.15 }}
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={handleKeyDown}
             style={{
-              flex: 1,
-              background: "none",
-              border: "none",
-              color: "var(--text-primary)",
-              fontSize: "14px",
-              outline: "none",
-              fontFamily: "var(--font-sans)",
+              width: "100%",
+              maxWidth: "500px",
+              backgroundColor: "var(--bg-card)",
+              border: "1px solid var(--border)",
+              borderRadius: "12px",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.4)",
+              overflow: "hidden",
             }}
-          />
-        </div>
-
-        {/* Results */}
-        <div style={{ maxHeight: "300px", overflowY: "auto", padding: "6px" }}>
-          {results.length === 0 && query && (
+          >
+            {/* Search input */}
             <div
               style={{
-                padding: "20px",
-                textAlign: "center",
-                color: "var(--text-muted)",
-                fontSize: "13px",
-              }}
-            >
-              No results found
-            </div>
-          )}
-          {results.map((item, i) => (
-            <div
-              key={`${item.type}-${item.label}-${i}`}
-              onClick={() => {
-                item.onSelect();
-                onClose();
-              }}
-              style={{
-                padding: "8px 12px",
+                padding: "14px 16px",
+                borderBottom: "1px solid var(--border)",
                 display: "flex",
                 alignItems: "center",
                 gap: "10px",
-                borderRadius: "6px",
-                cursor: "pointer",
-                backgroundColor: i === selectedIndex ? "var(--color-primary-dim)" : "transparent",
-                transition: "background-color 0.1s",
               }}
-              onMouseEnter={() => setSelectedIndex(i)}
             >
-              <span style={{ fontSize: "13px", width: "20px", textAlign: "center" }}>
-                {item.icon}
-              </span>
-              <span
+              <Search size={16} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+              <input
+                ref={inputRef}
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search or type a command..."
                 style={{
                   flex: 1,
-                  fontSize: "13px",
+                  background: "none",
+                  border: "none",
                   color: "var(--text-primary)",
+                  fontSize: "14px",
+                  outline: "none",
+                  fontFamily: "var(--font-sans)",
                 }}
-              >
-                <HighlightedText text={item.label} indices={item.indices} />
-              </span>
-              {item.shortcut && (
-                <span
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: "10px",
-                    color: "var(--text-dim)",
-                    padding: "2px 6px",
-                    backgroundColor: "var(--bg)",
-                    borderRadius: "3px",
-                  }}
-                >
-                  {item.shortcut}
-                </span>
-              )}
+              />
             </div>
-          ))}
-        </div>
-      </div>
-    </div>
+
+            {/* Results */}
+            <div style={{ position: "relative" }}>
+              <div style={{ maxHeight: "300px", overflowY: "auto", padding: "6px" }}>
+                {results.length === 0 && query && (
+                  <div
+                    style={{
+                      padding: "20px",
+                      textAlign: "center",
+                      color: "var(--text-muted)",
+                      fontSize: "13px",
+                    }}
+                  >
+                    No results found
+                  </div>
+                )}
+                {results.map((item, i) => (
+                  <div
+                    key={`${item.type}-${item.label}-${i}`}
+                    onClick={() => {
+                      item.onSelect();
+                      onClose();
+                    }}
+                    style={{
+                      padding: "8px 12px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      borderRadius: "6px",
+                      cursor: "pointer",
+                      backgroundColor:
+                        i === selectedIndex ? "rgba(99,102,241,0.15)" : "transparent",
+                      borderLeft:
+                        i === selectedIndex
+                          ? "2px solid var(--color-primary)"
+                          : "2px solid transparent",
+                      transition: "background-color 0.1s",
+                    }}
+                    onMouseEnter={() => setSelectedIndex(i)}
+                  >
+                    <span style={{ fontSize: "13px", width: "20px", textAlign: "center" }}>
+                      {item.icon}
+                    </span>
+                    <span
+                      style={{
+                        flex: 1,
+                        fontSize: "13px",
+                        color: "var(--text-primary)",
+                      }}
+                    >
+                      <HighlightedText text={item.label} indices={item.indices} />
+                    </span>
+                    {item.shortcut && (
+                      <span
+                        style={{
+                          fontFamily: "var(--font-mono)",
+                          fontSize: "10px",
+                          color: "var(--text-dim)",
+                          padding: "2px 6px",
+                          backgroundColor: "var(--bg)",
+                          borderRadius: "3px",
+                        }}
+                      >
+                        {item.shortcut}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  height: "24px",
+                  background: "linear-gradient(transparent, var(--bg-card))",
+                  pointerEvents: "none",
+                  borderRadius: "0 0 12px 12px",
+                }}
+              />
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
