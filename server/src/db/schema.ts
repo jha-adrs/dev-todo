@@ -100,3 +100,14 @@ export const recurringTemplates = sqliteTable("recurring_templates", {
     .notNull()
     .default(sql`(datetime('now'))`),
 });
+
+export const notes = sqliteTable("notes", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  spaceId: integer("space_id").notNull(),
+  title: text("title").notNull().default(""),
+  content: text("content"),
+  pinned: integer("pinned").notNull().default(0),
+  archived: integer("archived").notNull().default(0),
+  createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at").notNull().default(sql`(datetime('now'))`),
+});

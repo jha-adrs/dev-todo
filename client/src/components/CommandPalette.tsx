@@ -17,6 +17,8 @@ interface CommandPaletteProps {
   actions: CommandAction[];
   todos: Todo[];
   onSelectTodo: (id: number) => void;
+  view?: "todos" | "notes";
+  onSetView?: (v: "todos" | "notes") => void;
 }
 
 function fuzzyMatch(query: string, text: string): { matches: boolean; indices: number[] } {
@@ -60,6 +62,8 @@ export default function CommandPalette({
   actions,
   todos,
   onSelectTodo,
+  view,
+  onSetView,
 }: CommandPaletteProps) {
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -73,6 +77,19 @@ export default function CommandPalette({
     }
   }, [open]);
 
+  const viewActions = useMemo(() => {
+    if (!onSetView) return [];
+    const extra: CommandAction[] = [];
+    if (view === "todos") {
+      extra.push({ id: "switch-notes", label: "Switch to Notes", icon: "📝", action: () => { onSetView("notes"); onClose(); } });
+    } else if (view === "notes") {
+      extra.push({ id: "switch-todos", label: "Switch to Todos", icon: "✅", action: () => { onSetView("todos"); onClose(); } });
+    }
+    return extra;
+  }, [view, onSetView, onClose]);
+
+  const allActions = useMemo(() => [...viewActions, ...actions], [viewActions, actions]);
+
   const results = useMemo(() => {
     const items: Array<{
       type: "action" | "todo";
@@ -85,7 +102,7 @@ export default function CommandPalette({
 
     if (!query) {
       // Show all actions by default
-      actions.forEach((a) => {
+      allActions.forEach((a) => {
         items.push({
           type: "action",
           label: a.label,
@@ -97,7 +114,7 @@ export default function CommandPalette({
       });
     } else {
       // Filter actions
-      actions.forEach((a) => {
+      allActions.forEach((a) => {
         const match = fuzzyMatch(query, a.label);
         if (match.matches) {
           items.push({
@@ -127,7 +144,7 @@ export default function CommandPalette({
     }
 
     return items;
-  }, [query, actions, todos, onSelectTodo]);
+  }, [query, allActions, todos, onSelectTodo]);
 
   useEffect(() => {
     setSelectedIndex(0);

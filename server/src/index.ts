@@ -11,6 +11,7 @@ import settingsRouter from "./routes/settings.js";
 import tagsRouter from "./routes/tags.js";
 import recurringRouter from "./routes/recurring.js";
 import spacesRouter from "./routes/spaces.js";
+import notesRouter from "./routes/notes.js";
 import { generateRecurringTodos } from "./lib/recurring.js";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -47,6 +48,7 @@ app.use("/api/settings", settingsRouter);
 app.use("/api/tags", tagsRouter);
 app.use("/api/recurring", recurringRouter);
 app.use("/api/spaces", spacesRouter);
+app.use("/api/notes", notesRouter);
 
 // Serve client build in production
 const clientDist = path.resolve(PROJECT_ROOT, "client/dist");

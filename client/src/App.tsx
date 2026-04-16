@@ -2,9 +2,12 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useAuth } from "./hooks/useAuth";
 import { useTodos } from "./hooks/useTodos";
+import { useNotes } from "./hooks/useNotes";
 import LoginPage from "./components/LoginPage";
 import TodoList from "./components/TodoList";
 import DetailPanel from "./components/DetailPanel";
+import NoteList from "./components/NoteList";
+import NoteDetailPanel from "./components/NoteDetailPanel";
 import CommandPalette, { type CommandAction } from "./components/CommandPalette";
 import CalendarSidebar from "./components/CalendarSidebar";
 import DbExplorer from "./components/DbExplorer";
@@ -16,6 +19,8 @@ import { SpaceProvider, useSpace } from "./contexts/SpaceContext";
 export default function App() {
   const { loading: authLoading, authenticated, needsSetup, setup, login, logout } = useAuth();
   const [selectedTodoId, setSelectedTodoId] = useState<number | null>(null);
+  const [selectedNoteId, setSelectedNoteId] = useState<number | null>(null);
+  const [view, setView] = useState<"todos" | "notes">("todos");
   const [isFullPage, setIsFullPage] = useState(false);
   const [cmdPaletteOpen, setCmdPaletteOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(true);
@@ -37,6 +42,11 @@ export default function App() {
           setIsFullPage(false);
           return;
         }
+        if (selectedNoteId) {
+          setSelectedNoteId(null);
+          setIsFullPage(false);
+          return;
+        }
       }
 
       // Cmd+K — command palette (no other Cmd shortcuts to avoid browser collisions)
@@ -46,7 +56,7 @@ export default function App() {
         return;
       }
     },
-    [selectedTodoId, cmdPaletteOpen],
+    [selectedTodoId, selectedNoteId, cmdPaletteOpen],
   );
 
   useEffect(() => {
@@ -106,6 +116,10 @@ export default function App() {
         onLogout={logout}
         selectedTodoId={selectedTodoId}
         setSelectedTodoId={setSelectedTodoId}
+        selectedNoteId={selectedNoteId}
+        setSelectedNoteId={setSelectedNoteId}
+        view={view}
+        setView={setView}
         isFullPage={isFullPage}
         setIsFullPage={setIsFullPage}
         cmdPaletteOpen={cmdPaletteOpen}
@@ -127,6 +141,10 @@ function AuthenticatedApp({
   onLogout,
   selectedTodoId,
   setSelectedTodoId,
+  selectedNoteId,
+  setSelectedNoteId,
+  view,
+  setView,
   isFullPage,
   setIsFullPage,
   cmdPaletteOpen,
@@ -143,6 +161,10 @@ function AuthenticatedApp({
   onLogout: () => void;
   selectedTodoId: number | null;
   setSelectedTodoId: (id: number | null) => void;
+  selectedNoteId: number | null;
+  setSelectedNoteId: (id: number | null) => void;
+  view: "todos" | "notes";
+  setView: (v: "todos" | "notes") => void;
   isFullPage: boolean;
   setIsFullPage: (v: boolean) => void;
   cmdPaletteOpen: boolean;
@@ -163,6 +185,8 @@ function AuthenticatedApp({
   );
   const allTodos = [...today, ...backlog];
   const selectedTodo = selectedTodoId ? allTodos.find((t) => t.id === selectedTodoId) : null;
+  const notesData = useNotes();
+  const selectedNote = selectedNoteId ? notesData.notes.find((n) => n.id === selectedNoteId) : null;
   const { spaces, currentSpace, switchSpace, loading: spacesLoading } = useSpace();
   const [switchToast, setSwitchToast] = useState<string | null>(null);
   const [focusedIndex, setFocusedIndex] = useState<number>(-1);
@@ -410,6 +434,12 @@ function AuthenticatedApp({
         actions={cmdActions}
         todos={allTodos}
         onSelectTodo={(id) => setSelectedTodoId(id)}
+        view={view}
+        onSetView={(v) => {
+          setView(v);
+          setSelectedTodoId(null);
+          setSelectedNoteId(null);
+        }}
       />
 
       {/* Calendar sidebar */}
@@ -420,43 +450,59 @@ function AuthenticatedApp({
         onSelectDate={setSelectedDate}
       />
 
-      {/* Todo list */}
-      {!(isMobile && selectedTodo) && !isFullPage && (
+      {/* List panel (todos or notes) */}
+      {!(isMobile && (selectedTodo || selectedNote)) && !isFullPage && (
         <div
           style={{
-            width: selectedTodo ? "50%" : "100%",
-            maxWidth: selectedTodo ? undefined : "700px",
-            margin: selectedTodo ? undefined : "0 auto",
+            width: (selectedTodo || selectedNote) ? "50%" : "100%",
+            maxWidth: (selectedTodo || selectedNote) ? undefined : "700px",
+            margin: (selectedTodo || selectedNote) ? undefined : "0 auto",
             transition: "width 0.3s ease",
             height: "100vh",
             overflow: "hidden",
             boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
           }}
         >
-          <TodoList
-            today={today}
-            backlog={backlog}
-            loading={loading}
-            stats={stats}
-            selectedDate={selectedDate}
-            onLogout={onLogout}
-            selectedTodoId={selectedTodoId}
-            onSelectTodo={setSelectedTodoId}
-            onCreateTodo={createTodo}
-            onUpdateTodo={updateTodo}
-            onDeleteTodo={deleteTodo}
-            onToggleCalendar={() => setCalendarOpen(!calendarOpen)}
-            onOpenSettings={() => setShowSettings(true)}
-            focusedIndex={focusedIndex}
-            setFocusedIndex={setFocusedIndex}
-            listRef={listRef}
-          />
+          {view === "todos" ? (
+            <TodoList
+              today={today}
+              backlog={backlog}
+              loading={loading}
+              stats={stats}
+              selectedDate={selectedDate}
+              onLogout={onLogout}
+              selectedTodoId={selectedTodoId}
+              onSelectTodo={setSelectedTodoId}
+              onCreateTodo={createTodo}
+              onUpdateTodo={updateTodo}
+              onDeleteTodo={deleteTodo}
+              onToggleCalendar={() => setCalendarOpen(!calendarOpen)}
+              onOpenSettings={() => setShowSettings(true)}
+              focusedIndex={focusedIndex}
+              setFocusedIndex={setFocusedIndex}
+              listRef={listRef}
+            />
+          ) : (
+            <NoteList
+              notes={notesData.notes}
+              loading={notesData.loading}
+              showArchived={notesData.showArchived}
+              onToggleArchived={() => notesData.setShowArchived(!notesData.showArchived)}
+              selectedNoteId={selectedNoteId}
+              onSelectNote={setSelectedNoteId}
+              onCreateNote={async () => {
+                const note = await notesData.createNote();
+                setSelectedNoteId(note.id);
+                return note;
+              }}
+            />
+          )}
         </div>
       )}
 
       {/* Detail panel */}
       <AnimatePresence>
-        {selectedTodo && (
+        {view === "todos" && selectedTodo && (
           <motion.div
             key="detail-panel"
             initial={{ x: 40, opacity: 0 }}
@@ -486,6 +532,43 @@ function AuthenticatedApp({
               onUpdate={updateTodo}
               onUpdateTags={updateTodoTags}
               onDelete={deleteTodo}
+              isFullPage={isFullPage}
+              onToggleFullPage={() => setIsFullPage(!isFullPage)}
+            />
+          </motion.div>
+        )}
+        {view === "notes" && selectedNote && (
+          <motion.div
+            key="note-detail-panel"
+            initial={{ x: 40, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: 40, opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            style={{
+              width: isFullPage || isMobile ? "100%" : "50%",
+              position: isMobile ? "fixed" : "relative",
+              top: isMobile ? 0 : undefined,
+              left: isMobile ? 0 : undefined,
+              right: isMobile ? 0 : undefined,
+              bottom: isMobile ? 0 : undefined,
+              zIndex: isMobile ? 50 : undefined,
+              borderLeft: isFullPage || isMobile ? "none" : "1px solid var(--border)",
+              height: "100vh",
+              transition: "width 0.3s ease",
+              boxShadow: isFullPage || isMobile ? "none" : "-4px 0 12px rgba(0,0,0,0.2)",
+            }}
+          >
+            <NoteDetailPanel
+              note={selectedNote}
+              onClose={() => {
+                setSelectedNoteId(null);
+                setIsFullPage(false);
+              }}
+              onUpdate={notesData.updateNote}
+              onDelete={(id) => {
+                notesData.deleteNote(id);
+                setSelectedNoteId(null);
+              }}
               isFullPage={isFullPage}
               onToggleFullPage={() => setIsFullPage(!isFullPage)}
             />
