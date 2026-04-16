@@ -9,3 +9,4 @@ uploads/
 *.db-shm
 .DS_Store
 .superpowers/
+dist-release/

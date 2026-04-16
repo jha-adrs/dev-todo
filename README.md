@@ -41,7 +41,25 @@ Every todo is scoped to today. Unfinished items roll over as backlog. Multiple w
 
 ## Quick Start
 
-### With Docker (recommended)
+### Download prebuilt release (recommended)
+
+Zero build, ~10 seconds. Requires Node.js 20+ installed on the target machine.
+
+```bash
+# x64 (most VPS providers — Lightsail, DigitalOcean, EC2, Hetzner, etc.)
+curl -fsSL https://github.com/jha-adrs/dev-todo/releases/latest/download/devtodo-linux-x64.tar.gz | tar xz
+cd devtodo-*-linux-x64 && ./run.sh
+
+# arm64 (Oracle Cloud free tier, AWS Graviton, Lightsail ARM, Raspberry Pi 4+)
+curl -fsSL https://github.com/jha-adrs/dev-todo/releases/latest/download/devtodo-linux-arm64.tar.gz | tar xz
+cd devtodo-*-linux-arm64 && ./run.sh
+```
+
+App starts on **http://localhost:3000**. First visit prompts you to create a password.
+
+SHA256 sums are published alongside each tarball — see the [releases page](https://github.com/jha-adrs/dev-todo/releases/latest).
+
+### With Docker
 
 ```bash
 git clone https://github.com/jha-adrs/dev-todo.git
@@ -72,18 +90,18 @@ Vite (5173) + Express (3000) with hot reload.
 ## Deploying to AWS Lightsail (or any VPS)
 
 1. **Spin up** a Lightsail instance (Ubuntu 22.04+, 1GB RAM minimum).
-2. **SSH in** and install Docker:
+2. **SSH in** and install Node 20:
    ```bash
-   curl -fsSL https://get.docker.com | sh
-   sudo usermod -aG docker $USER && newgrp docker
+   curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+   sudo apt-get install -y nodejs
    ```
-3. **Clone & start:**
+3. **Download and run:**
    ```bash
-   git clone https://github.com/jha-adrs/dev-todo.git
-   cd dev-todo
-   echo "JWT_SECRET=$(openssl rand -hex 32)" > .env
-   docker compose up -d
+   curl -fsSL https://github.com/jha-adrs/dev-todo/releases/latest/download/devtodo-linux-x64.tar.gz | tar xz
+   cd devtodo-*-linux-x64
+   ./run.sh
    ```
+   (Use `devtodo-linux-arm64.tar.gz` on an ARM instance.)
 4. **Open port 3000** in Lightsail's firewall, or run a reverse proxy.
 
 ### Reverse proxy + HTTPS (Caddy, ~5 min)
@@ -102,11 +120,21 @@ Caddy auto-provisions Let's Encrypt SSL. Done.
 
 ### Updating
 
+Prebuilt release:
+```bash
+cd ~
+curl -fsSL https://github.com/jha-adrs/dev-todo/releases/latest/download/devtodo-linux-x64.tar.gz | tar xz
+# Migrate your existing data/ and .env into the new directory,
+# or extract over the old directory — data/, uploads/, and .env are preserved.
+cd devtodo-*-linux-x64 && ./run.sh
+```
+
+Docker:
 ```bash
 cd dev-todo && git pull && docker compose up -d --build
 ```
 
-Data persists in Docker volumes (`data` for SQLite, `uploads` for files).
+Data persists in `./data` (SQLite) and `./uploads` (files) — or in Docker volumes if you used Docker.
 
 ## Configuration
 
