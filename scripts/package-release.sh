@@ -89,4 +89,4 @@ echo "✓ Produced:"
 ls -lh "${TARBALL}" "${TARBALL}.sha256"
 echo ""
 echo "Tarball contents (top level):"
-tar -tzf "${TARBALL}" | head -20
+tar -tzf "${TARBALL}" | head -20 || true
