@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Clock, X, CalendarClock } from "lucide-react";
 
 interface SnoozePopoverProps {
+  todoId?: number;
   currentSnooze: string | null;
   onSnooze: (date: string | null) => void;
 }
@@ -20,9 +21,15 @@ function nextMonday(): string {
   return d.toISOString().split("T")[0];
 }
 
-export default function SnoozePopover({ currentSnooze, onSnooze }: SnoozePopoverProps) {
+export default function SnoozePopover({ todoId, currentSnooze, onSnooze }: SnoozePopoverProps) {
   const [open, setOpen] = useState(false);
   const [customDate, setCustomDate] = useState("");
+
+  // Reset dropdown state when switching todos
+  useEffect(() => {
+    setOpen(false);
+    setCustomDate("");
+  }, [todoId]);
 
   const isSnoozed = currentSnooze && currentSnooze > new Date().toISOString().split("T")[0];
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, Maximize2, Minimize2, Trash2, Check, Pin } from "lucide-react";
-import type { Todo } from "../hooks/useTodos";
+import type { Todo, TagInfo } from "../hooks/useTodos";
 import RichTextEditor from "./RichTextEditor";
 import { PrioritySelect } from "./PriorityIcon";
 import TagSelector from "./TagSelector";
@@ -11,6 +11,7 @@ interface DetailPanelProps {
   todo: Todo;
   onClose: () => void;
   onUpdate: (id: number, fields: Partial<Pick<Todo, "title" | "description" | "status" | "priority" | "dueDate" | "pinned" | "snoozedUntil">>) => void;
+  onUpdateTags: (id: number, tags: TagInfo[]) => void;
   onDelete: (id: number) => void;
   isFullPage: boolean;
   onToggleFullPage: () => void;
@@ -20,6 +21,7 @@ export default function DetailPanel({
   todo,
   onClose,
   onUpdate,
+  onUpdateTags,
   onDelete,
   isFullPage,
   onToggleFullPage,
@@ -297,15 +299,14 @@ export default function DetailPanel({
           <TagSelector
             todoId={todo.id}
             currentTags={todo.tags || []}
-            onTagsChange={() => {
-              // Tags update happens via API, re-fetch will pick it up
-            }}
+            onTagsChange={(tags) => onUpdateTags(todo.id, tags)}
           />
         </div>
 
         {/* Snooze */}
         <div style={{ marginBottom: "20px" }}>
           <SnoozePopover
+            todoId={todo.id}
             currentSnooze={todo.snoozedUntil}
             onSnooze={(date) => onUpdate(todo.id, { snoozedUntil: date })}
           />

@@ -157,7 +157,7 @@ function AuthenticatedApp({
 }) {
   const todayStr = new Date().toISOString().split("T")[0];
   const isViewingToday = selectedDate === todayStr;
-  const { today, backlog, loading, stats, createTodo, updateTodo, deleteTodo } = useTodos(
+  const { today, backlog, loading, stats, createTodo, updateTodo, deleteTodo, updateTodoTags } = useTodos(
     isViewingToday ? undefined : selectedDate,
   );
   const allTodos = [...today, ...backlog];
@@ -475,6 +475,7 @@ function AuthenticatedApp({
               setIsFullPage(false);
             }}
             onUpdate={updateTodo}
+            onUpdateTags={updateTodoTags}
             onDelete={deleteTodo}
             isFullPage={isFullPage}
             onToggleFullPage={() => setIsFullPage(!isFullPage)}

@@ -139,6 +139,16 @@ export function useTodos(date?: string) {
     [fetchTodos],
   );
 
+  const updateTodoTags = useCallback(
+    (id: number, tags: TagInfo[]) => {
+      const patchTags = (list: Todo[]) =>
+        list.map((t) => (t.id === id ? { ...t, tags } : t));
+      setToday(patchTags);
+      setBacklog(patchTags);
+    },
+    [],
+  );
+
   const stats = {
     total: today.length,
     completed: today.filter((t) => t.status === "completed").length,
@@ -146,5 +156,5 @@ export function useTodos(date?: string) {
     snoozedCount,
   };
 
-  return { today, backlog, snoozedCount, loading, stats, createTodo, updateTodo, deleteTodo, fetchTodos };
+  return { today, backlog, snoozedCount, loading, stats, createTodo, updateTodo, deleteTodo, updateTodoTags, fetchTodos };
 }

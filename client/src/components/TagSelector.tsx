@@ -21,9 +21,16 @@ export default function TagSelector({ todoId, currentTags, onTagsChange }: TagSe
   const [newTagName, setNewTagName] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Reset dropdown state when switching todos
+  useEffect(() => {
+    setOpen(false);
+    setNewTagName("");
+  }, [todoId]);
+
+  // Fetch all tags on mount and when dropdown opens (picks up newly created tags)
   useEffect(() => {
     api.get<AllTag[]>("/api/tags").then(setAllTags).catch(console.error);
-  }, []);
+  }, [open]);
 
   const currentIds = new Set(currentTags.map((t) => t.id));
   const availableTags = allTags.filter((t) => !currentIds.has(t.id));
