@@ -564,7 +564,13 @@ function AuthenticatedApp({
                 setSelectedNoteId(null);
                 setIsFullPage(false);
               }}
-              onUpdate={notesData.updateNote}
+              onUpdate={(id, fields) => {
+                notesData.updateNote(id, fields);
+                // Close panel when archiving (note leaves the visible list)
+                if (fields.archived === 1) {
+                  setSelectedNoteId(null);
+                }
+              }}
               onDelete={(id) => {
                 notesData.deleteNote(id);
                 setSelectedNoteId(null);

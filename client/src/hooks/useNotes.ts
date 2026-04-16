@@ -51,7 +51,12 @@ export function useNotes() {
       );
       try {
         const updated = await api.patch<Note>(`/api/notes/${id}`, fields);
-        setNotes((prev) => prev.map((n) => (n.id === id ? updated : n)));
+        // Re-fetch to get correct filtered list (archived notes leave/enter based on showArchived)
+        if (fields.archived !== undefined) {
+          await fetchNotes();
+        } else {
+          setNotes((prev) => prev.map((n) => (n.id === id ? updated : n)));
+        }
         return updated;
       } catch {
         await fetchNotes();
