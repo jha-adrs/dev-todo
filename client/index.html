@@ -4,12 +4,58 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DevTodo</title>
-    <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
     <script>
       // Prevent flash of wrong theme
-      const theme = localStorage.getItem("devtodo-theme") || "dark";
+      var theme = localStorage.getItem("devtodo-theme") || "dark";
       document.documentElement.className = theme;
+
+      // Prevent flash of wrong font — inject CDN links before React mounts
+      (function() {
+        var FONT_URLS = {
+          "general-sans": "https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap",
+          "inter": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+          "geist": "https://cdn.jsdelivr.net/npm/geist@1/dist/fonts/geist-sans/style.css",
+          "dm-sans": "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap",
+          "plus-jakarta": "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap",
+          "outfit": "https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap",
+          "space-grotesk": "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap",
+          "jetbrains-mono": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap",
+          "geist-mono": "https://cdn.jsdelivr.net/npm/geist@1/dist/fonts/geist-mono/style.css",
+          "fira-code": "https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&display=swap",
+          "source-code-pro": "https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500;600&display=swap",
+          "ibm-plex-mono": "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+        };
+        var FONT_FAMILIES = {
+          "general-sans": '"General Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          "inter": '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          "geist": '"Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          "dm-sans": '"DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          "plus-jakarta": '"Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          "outfit": '"Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          "space-grotesk": '"Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          "jetbrains-mono": '"JetBrains Mono", "SF Mono", Monaco, "Cascadia Code", monospace',
+          "geist-mono": '"Geist Mono", "SF Mono", Monaco, "Cascadia Code", monospace',
+          "fira-code": '"Fira Code", "SF Mono", Monaco, "Cascadia Code", monospace',
+          "source-code-pro": '"Source Code Pro", "SF Mono", Monaco, "Cascadia Code", monospace',
+          "ibm-plex-mono": '"IBM Plex Mono", "SF Mono", Monaco, "Cascadia Code", monospace'
+        };
+        function injectFont(key, type) {
+          var id = localStorage.getItem(key);
+          if (id && FONT_URLS[id]) {
+            var l = document.createElement("link");
+            l.rel = "stylesheet";
+            l.href = FONT_URLS[id];
+            l.dataset.fontId = id;
+            l.dataset.fontType = type;
+            document.head.appendChild(l);
+            if (FONT_FAMILIES[id]) {
+              document.documentElement.style.setProperty("--font-" + type, FONT_FAMILIES[id]);
+            }
+          }
+        }
+        injectFont("devtodo-font-sans", "sans");
+        injectFont("devtodo-font-mono", "mono");
+      })();
     </script>
   </head>
   <body>
