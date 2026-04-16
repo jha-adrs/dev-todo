@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { AnimatePresence } from "motion/react";
-import { Calendar, Settings, ChevronRight, Trash2 } from "lucide-react";
+import { Calendar, Settings, ChevronRight, Trash2, Plus, LogOut } from "lucide-react";
 import SpaceSwitcher from "./SpaceSwitcher";
 import type { Todo } from "../hooks/useTodos";
 import TodoItem from "./TodoItem";
@@ -48,6 +48,7 @@ export default function TodoList({
   const [newTitle, setNewTitle] = useState("");
   const [backlogOpen, setBacklogOpen] = useState(true);
   const [internalFocusedIndex, setInternalFocusedIndex] = useState(-1);
+  const [inputFocused, setInputFocused] = useState(false);
   const focusedIndex = externalFocusedIndex !== undefined ? externalFocusedIndex : internalFocusedIndex;
   const setFocusedIndex = externalSetFocusedIndex || setInternalFocusedIndex;
   const inputRef = useRef<HTMLInputElement>(null);
@@ -145,7 +146,16 @@ export default function TodoList({
         }}
       >
         <SpaceSwitcher onOpenSettings={onOpenSettings} />
-        <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "0",
+            alignItems: "center",
+            border: "1px solid var(--border)",
+            borderRadius: "8px",
+            overflow: "hidden",
+          }}
+        >
           {onToggleCalendar && (
             <button
               onClick={onToggleCalendar}
@@ -153,8 +163,9 @@ export default function TodoList({
               style={{
                 padding: "6px 10px",
                 backgroundColor: "var(--bg-card)",
-                border: "1px solid var(--border)",
-                borderRadius: "6px",
+                border: "none",
+                borderRight: "1px solid var(--border)",
+                borderRadius: 0,
                 color: "var(--text-secondary)",
                 fontSize: "14px",
                 cursor: "pointer",
@@ -174,8 +185,9 @@ export default function TodoList({
               style={{
                 padding: "6px 10px",
                 backgroundColor: "var(--bg-card)",
-                border: "1px solid var(--border)",
-                borderRadius: "6px",
+                border: "none",
+                borderRight: "1px solid var(--border)",
+                borderRadius: 0,
                 color: "var(--text-secondary)",
                 fontSize: "14px",
                 cursor: "pointer",
@@ -189,17 +201,21 @@ export default function TodoList({
           )}
           <button
             onClick={onLogout}
+            title="Logout"
             style={{
-              padding: "6px 14px",
+              padding: "6px 10px",
               backgroundColor: "var(--bg-card)",
-              border: "1px solid var(--border)",
-              borderRadius: "6px",
+              border: "none",
+              borderRadius: 0,
               color: "var(--text-secondary)",
-              fontSize: "12px",
+              fontSize: "14px",
               cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
-            Logout
+            <LogOut size={16} />
           </button>
         </div>
       </div>
@@ -238,6 +254,17 @@ export default function TodoList({
         )}
 
         <form onSubmit={handleCreate} style={{ marginTop: "16px", position: "relative" }}>
+          <Plus
+            size={15}
+            style={{
+              position: "absolute",
+              left: "12px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              color: "var(--text-muted)",
+              pointerEvents: "none",
+            }}
+          />
           <input
             ref={inputRef}
             type="text"
@@ -246,37 +273,52 @@ export default function TodoList({
             placeholder="What needs to be done?"
             style={{
               width: "100%",
-              padding: "10px 60px 10px 14px",
+              padding: "10px 60px 10px 36px",
               backgroundColor: "var(--bg-card)",
               border: "1px solid var(--border)",
               borderRadius: "8px",
               color: "var(--text-primary)",
-              fontSize: "14px",
+              fontSize: "15px",
               outline: "none",
               boxSizing: "border-box",
-              transition: "border-color 0.2s",
+              transition: "border-color 0.2s, box-shadow 0.2s",
             }}
-            onFocus={(e) => (e.target.style.borderColor = "var(--color-primary)")}
-            onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+            onFocus={(e) => {
+              e.target.style.borderColor = "var(--color-primary)";
+              e.target.style.boxShadow = "0 0 0 2px rgba(99,102,241,0.15)";
+              setInputFocused(true);
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = "var(--border)";
+              e.target.style.boxShadow = "none";
+              setInputFocused(false);
+            }}
           />
-          <kbd
+          <span
             style={{
               position: "absolute",
               right: "10px",
               top: "50%",
               transform: "translateY(-50%)",
-              fontFamily: "var(--font-mono)",
-              fontSize: "10px",
-              color: "var(--text-muted)",
-              padding: "2px 6px",
-              backgroundColor: "var(--bg)",
-              border: "1px solid var(--border)",
-              borderRadius: "4px",
+              opacity: inputFocused ? 1 : 0,
+              transition: "opacity 0.2s",
               pointerEvents: "none",
             }}
           >
-            ⏎
-          </kbd>
+            <kbd
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "10px",
+                color: "var(--text-muted)",
+                padding: "2px 6px",
+                backgroundColor: "var(--bg)",
+                border: "1px solid var(--border)",
+                borderRadius: "4px",
+              }}
+            >
+              ⏎
+            </kbd>
+          </span>
         </form>
 
         {/* Navigation hint — visible when list has activity */}
@@ -290,6 +332,7 @@ export default function TodoList({
               fontSize: "10px",
               color: "var(--text-dim)",
               flexWrap: "wrap",
+              opacity: 0.6,
             }}
           >
             <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>

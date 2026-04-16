@@ -26,6 +26,7 @@ export default function TodoItem({
 }: TodoItemProps) {
   const isCompleted = todo.status === "completed";
   const [showConfetti, setShowConfetti] = useState(false);
+  const [checkboxHovered, setCheckboxHovered] = useState(false);
 
   function handleToggle() {
     if (!isCompleted) {
@@ -58,15 +59,25 @@ export default function TodoItem({
             ? "4px solid var(--color-amber)"
             : todo.pinned === 1
               ? "4px solid var(--color-primary-50)"
-              : "4px solid transparent",
-        backgroundColor: isFocused
+              : todo.priority === "highest"
+                ? "3px solid var(--color-danger)"
+                : todo.priority === "high"
+                  ? "3px solid var(--color-amber)"
+                  : "4px solid transparent",
+        background: isFocused
           ? "var(--color-primary-dim)"
-          : "transparent",
-        boxShadow: isFocused ? "0 0 0 1px var(--color-primary-border)" : "none",
+          : todo.priority === "highest"
+            ? "linear-gradient(90deg, rgba(239,68,68,0.08) 0%, transparent 20%)"
+            : todo.priority === "high"
+              ? "linear-gradient(90deg, rgba(245,158,11,0.06) 0%, transparent 20%)"
+              : "transparent",
+        boxShadow: isFocused
+          ? "-2px 0 8px rgba(99,102,241,0.3), 0 0 0 1px var(--color-primary-border)"
+          : "none",
         position: "relative",
         transition: "border-left-color 0.15s, background-color 0.15s, box-shadow 0.15s",
       }}
-      whileHover={{ backgroundColor: "var(--color-primary-dim)" }}
+      whileHover={{ backgroundColor: "rgba(99,102,241,0.14)" }}
     >
       {/* Focus indicator chevron */}
       {isFocused && (
@@ -93,12 +104,18 @@ export default function TodoItem({
           e.stopPropagation();
           handleToggle();
         }}
+        onMouseEnter={() => setCheckboxHovered(true)}
+        onMouseLeave={() => setCheckboxHovered(false)}
         style={{
           width: "18px",
           height: "18px",
           borderRadius: "4px",
           border: `2px solid ${isCompleted ? "var(--color-green)" : isBacklog ? "var(--color-amber)" : "var(--color-primary)"}`,
-          backgroundColor: isCompleted ? "var(--color-green)" : "transparent",
+          backgroundColor: isCompleted
+            ? "var(--color-green)"
+            : checkboxHovered
+              ? "rgba(34, 197, 94, 0.2)"
+              : "transparent",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -112,20 +129,19 @@ export default function TodoItem({
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: [0, 1.3, 1] }}
-            transition={{ duration: 0.3 }}
+            transition={{ type: "spring", stiffness: 400, damping: 15 }}
           >
             <Check size={12} color="white" strokeWidth={3} />
           </motion.div>
         )}
         {showConfetti && (
           <motion.div
-            initial={{ scale: 0, opacity: 1 }}
+            initial={{ scale: 0.8, opacity: 0.6 }}
             animate={{ scale: 2, opacity: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.4 }}
             style={{
               position: "absolute",
-              width: "18px",
-              height: "18px",
+              inset: "-4px",
               borderRadius: "50%",
               border: "2px solid var(--color-green)",
               pointerEvents: "none",
@@ -229,10 +245,21 @@ export default function TodoItem({
 
       {/* Pin indicator */}
       {todo.pinned === 1 && (
-        <Pin
-          size={13}
-          style={{ flexShrink: 0, opacity: 0.4, color: "var(--color-primary-light)" }}
-        />
+        <span
+          style={{
+            flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
+            backgroundColor: "var(--color-primary-dim)",
+            padding: "2px 4px",
+            borderRadius: "3px",
+          }}
+        >
+          <Pin
+            size={13}
+            style={{ opacity: 0.8, color: "var(--color-primary-light)" }}
+          />
+        </span>
       )}
 
       {/* Delete button */}

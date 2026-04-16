@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { useAuth } from "./hooks/useAuth";
 import { useTodos } from "./hooks/useTodos";
 import LoginPage from "./components/LoginPage";
@@ -349,8 +350,8 @@ function AuthenticatedApp({
               top: 0,
               left: 0,
               right: 0,
-              height: "120px",
-              background: `radial-gradient(ellipse at top, ${currentSpace.color}10, transparent 70%)`,
+              height: "150px",
+              background: `radial-gradient(ellipse at top, ${currentSpace.color}2a, transparent 70%)`,
               zIndex: 1,
               pointerEvents: "none",
               transition: "background 0.3s",
@@ -429,6 +430,7 @@ function AuthenticatedApp({
             transition: "width 0.3s ease",
             height: "100vh",
             overflow: "hidden",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
           }}
         >
           <TodoList
@@ -453,35 +455,43 @@ function AuthenticatedApp({
       )}
 
       {/* Detail panel */}
-      {selectedTodo && (
-        <div
-          style={{
-            width: isFullPage || isMobile ? "100%" : "50%",
-            position: isMobile ? "fixed" : "relative",
-            top: isMobile ? 0 : undefined,
-            left: isMobile ? 0 : undefined,
-            right: isMobile ? 0 : undefined,
-            bottom: isMobile ? 0 : undefined,
-            zIndex: isMobile ? 50 : undefined,
-            borderLeft: isFullPage || isMobile ? "none" : "1px solid var(--border)",
-            height: "100vh",
-            transition: "width 0.3s ease",
-          }}
-        >
-          <DetailPanel
-            todo={selectedTodo}
-            onClose={() => {
-              setSelectedTodoId(null);
-              setIsFullPage(false);
+      <AnimatePresence>
+        {selectedTodo && (
+          <motion.div
+            key="detail-panel"
+            initial={{ x: 40, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: 40, opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            style={{
+              width: isFullPage || isMobile ? "100%" : "50%",
+              position: isMobile ? "fixed" : "relative",
+              top: isMobile ? 0 : undefined,
+              left: isMobile ? 0 : undefined,
+              right: isMobile ? 0 : undefined,
+              bottom: isMobile ? 0 : undefined,
+              zIndex: isMobile ? 50 : undefined,
+              borderLeft: isFullPage || isMobile ? "none" : "1px solid var(--border)",
+              height: "100vh",
+              transition: "width 0.3s ease",
+              boxShadow: isFullPage || isMobile ? "none" : "-4px 0 12px rgba(0,0,0,0.2)",
             }}
-            onUpdate={updateTodo}
-            onUpdateTags={updateTodoTags}
-            onDelete={deleteTodo}
-            isFullPage={isFullPage}
-            onToggleFullPage={() => setIsFullPage(!isFullPage)}
-          />
-        </div>
-      )}
+          >
+            <DetailPanel
+              todo={selectedTodo}
+              onClose={() => {
+                setSelectedTodoId(null);
+                setIsFullPage(false);
+              }}
+              onUpdate={updateTodo}
+              onUpdateTags={updateTodoTags}
+              onDelete={deleteTodo}
+              isFullPage={isFullPage}
+              onToggleFullPage={() => setIsFullPage(!isFullPage)}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
