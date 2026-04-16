@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Trash2, Edit3, Plus } from "lucide-react";
 import { api } from "../lib/api";
 import { getTheme, setTheme, THEMES, type Theme } from "../lib/theme";
+import { SANS_FONTS, MONO_FONTS, applyFont, getSavedFonts, preloadAllFonts } from "../lib/fonts";
 import { useSpace, type Space } from "../contexts/SpaceContext";
 import { SPACE_COLORS } from "./SpaceSwitcher";
 
@@ -50,6 +51,8 @@ export default function SettingsPage({ onBack, onLogout }: SettingsPageProps) {
   const [stats, setStats] = useState<AppStats | null>(null);
   const [settings, setSettingsState] = useState(getSettings);
   const [currentTheme, setCurrentTheme] = useState<Theme>(getTheme());
+  const [currentSansFont, setCurrentSansFont] = useState(getSavedFonts().sans);
+  const [currentMonoFont, setCurrentMonoFont] = useState(getSavedFonts().mono);
   const [confirmReset, setConfirmReset] = useState<"todos" | "all" | null>(null);
   const [message, setMessage] = useState("");
   const [allTags, setAllTags] = useState<Array<{ id: number; name: string; color: string; usageCount: number }>>([]);
@@ -61,6 +64,12 @@ export default function SettingsPage({ onBack, onLogout }: SettingsPageProps) {
     api.get<Array<{ id: number; name: string; color: string; usageCount: number }>>("/api/tags").then(setAllTags).catch(console.error);
   }, []);
 
+  // Preload all fonts so the picker shows actual typefaces
+  useEffect(() => {
+    const cleanup = preloadAllFonts();
+    return cleanup;
+  }, []);
+
   function updateSetting<K extends keyof AppSettings>(key: K, value: AppSettings[K]) {
     const updated = { ...settings, [key]: value };
     setSettingsState(updated);
@@ -70,6 +79,16 @@ export default function SettingsPage({ onBack, onLogout }: SettingsPageProps) {
   function handleThemeChange(t: Theme) {
     setTheme(t);
     setCurrentTheme(t);
+  }
+
+  function handleSansFontChange(fontId: string) {
+    applyFont("sans", fontId);
+    setCurrentSansFont(fontId);
+  }
+
+  function handleMonoFontChange(fontId: string) {
+    applyFont("mono", fontId);
+    setCurrentMonoFont(fontId);
   }
 
   async function handleBackup() {
@@ -230,6 +249,52 @@ export default function SettingsPage({ onBack, onLogout }: SettingsPageProps) {
           </SettingRow>
           <SettingRow label="Compact Mode" description="Reduce padding and spacing in the todo list">
             <Toggle value={settings.compactMode} onChange={(v) => updateSetting("compactMode", v)} />
+          </SettingRow>
+          <SettingRow label="UI Font" description="Sans-serif font for titles, labels, and body text">
+            <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
+              {SANS_FONTS.map((f) => (
+                <button
+                  key={f.id}
+                  onClick={() => handleSansFontChange(f.id)}
+                  style={{
+                    padding: "5px 10px",
+                    fontSize: "11px",
+                    fontWeight: 500,
+                    fontFamily: f.cssFamily,
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    border: currentSansFont === f.id ? "1px solid var(--color-primary-border)" : "1px solid var(--border)",
+                    backgroundColor: currentSansFont === f.id ? "var(--color-primary-dim)" : "var(--bg-card)",
+                    color: currentSansFont === f.id ? "var(--color-primary-light)" : "var(--text-secondary)",
+                  }}
+                >
+                  {f.name}
+                </button>
+              ))}
+            </div>
+          </SettingRow>
+          <SettingRow label="Code Font" description="Monospace font for timestamps, IDs, and code blocks">
+            <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
+              {MONO_FONTS.map((f) => (
+                <button
+                  key={f.id}
+                  onClick={() => handleMonoFontChange(f.id)}
+                  style={{
+                    padding: "5px 10px",
+                    fontSize: "11px",
+                    fontWeight: 500,
+                    fontFamily: f.cssFamily,
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    border: currentMonoFont === f.id ? "1px solid var(--color-primary-border)" : "1px solid var(--border)",
+                    backgroundColor: currentMonoFont === f.id ? "var(--color-primary-dim)" : "var(--bg-card)",
+                    color: currentMonoFont === f.id ? "var(--color-primary-light)" : "var(--text-secondary)",
+                  }}
+                >
+                  {f.name}
+                </button>
+              ))}
+            </div>
           </SettingRow>
         </Section>
 
