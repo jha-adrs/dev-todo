@@ -45,6 +45,7 @@ Every todo is scoped to today. Unfinished items roll over as backlog. Multiple w
 
 Zero build, ~10 seconds. Requires Node.js 20+ installed on the target machine.
 
+**Linux:**
 ```bash
 # x64 (most VPS providers — Lightsail, DigitalOcean, EC2, Hetzner, etc.)
 curl -fsSL https://github.com/jha-adrs/dev-todo/releases/latest/download/devtodo-linux-x64.tar.gz | tar xz
@@ -53,6 +54,17 @@ cd devtodo-*-linux-x64 && ./run.sh
 # arm64 (Oracle Cloud free tier, AWS Graviton, Lightsail ARM, Raspberry Pi 4+)
 curl -fsSL https://github.com/jha-adrs/dev-todo/releases/latest/download/devtodo-linux-arm64.tar.gz | tar xz
 cd devtodo-*-linux-arm64 && ./run.sh
+```
+
+**macOS:**
+```bash
+# Apple Silicon (M1/M2/M3/M4)
+curl -fsSL https://github.com/jha-adrs/dev-todo/releases/latest/download/devtodo-darwin-arm64.tar.gz | tar xz
+cd devtodo-*-darwin-arm64 && ./run.sh
+
+# Intel Mac
+curl -fsSL https://github.com/jha-adrs/dev-todo/releases/latest/download/devtodo-darwin-x64.tar.gz | tar xz
+cd devtodo-*-darwin-x64 && ./run.sh
 ```
 
 App starts on **http://localhost:3000**. First visit prompts you to create a password.

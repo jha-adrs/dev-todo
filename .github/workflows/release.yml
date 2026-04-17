@@ -19,6 +19,10 @@ jobs:
             runner: ubuntu-24.04
           - platform: linux-arm64
             runner: ubuntu-24.04-arm
+          - platform: darwin-x64
+            runner: macos-13
+          - platform: darwin-arm64
+            runner: macos-14
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout
