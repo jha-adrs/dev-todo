@@ -6,6 +6,7 @@ import { db } from "../db/index.js";
 import { images } from "../db/schema.js";
 import { requireAuth, AuthRequest } from "../middleware/auth.js";
 import { createStorageProvider } from "../storage/index.js";
+import { logger } from "../lib/logger.js";
 
 const router = Router();
 router.use(requireAuth);
@@ -50,7 +51,7 @@ router.post("/", upload.single("file"), async (req: AuthRequest, res: Response) 
       mimeType: file.mimetype,
     });
   } catch (err) {
-    console.error("Upload failed:", err);
+    logger.error("upload failed", { error: (err as Error).message });
     res.status(500).json({ error: "Upload failed" });
   }
 });

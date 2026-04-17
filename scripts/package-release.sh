@@ -51,6 +51,7 @@ cp scripts/run.sh "${STAGING_DIR}/run.sh"
 chmod +x "${STAGING_DIR}/run.sh"
 cp package.json "${STAGING_DIR}/package.json"
 cp .env.example "${STAGING_DIR}/.env.example"
+cp ecosystem.config.js "${STAGING_DIR}/ecosystem.config.js"
 echo "${VERSION}" > "${STAGING_DIR}/VERSION"
 
 cat > "${STAGING_DIR}/README.txt" <<EOF

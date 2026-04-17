@@ -2,6 +2,7 @@ import { db } from "../db/index.js";
 import { recurringTemplates, todos, todoTags } from "../db/schema.js";
 import { eq } from "drizzle-orm";
 import { CronExpressionParser } from "cron-parser";
+import { logger } from "./logger.js";
 
 function todayDateStr(): string {
   return new Date().toISOString().split("T")[0];
@@ -55,14 +56,14 @@ export function generateRecurringTodos() {
           .run();
 
         generated++;
-        console.log(`[devtodo] generated recurring: "${template.title}"`);
+        logger.info("generated recurring todo", { title: template.title });
       }
     } catch (err) {
-      console.error(`[devtodo] invalid cron for template ${template.id}:`, err);
+      logger.error("invalid cron for recurring template", { templateId: template.id, error: (err as Error).message });
     }
   }
 
   if (generated > 0) {
-    console.log(`[devtodo] generated ${generated} recurring todo(s)`);
+    logger.info("recurring generation complete", { count: generated });
   }
 }
