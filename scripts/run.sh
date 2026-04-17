@@ -47,12 +47,35 @@ fi
 # ─── 3. Ensure runtime directories exist ─────────────────────────────
 mkdir -p data uploads logs
 
-# ─── 4. Ensure PM2 is available ──────────────────────────────────────
+# ─── 4. Ensure PM2 is available under the correct Node ──────────────
+# PM2 must be installed under the same Node version that will run the app.
+# If PM2 exists but was installed under a different Node, its daemon will
+# spawn processes with the wrong ABI → better-sqlite3 crashes.
+NEED_PM2_INSTALL=false
 if ! command -v pm2 >/dev/null 2>&1; then
+  NEED_PM2_INSTALL=true
+else
+  # Check if PM2's node matches our node
+  PM2_NODE=$(pm2 --version 2>/dev/null && which pm2 | xargs head -1 | grep -oE '/[^ ]+/node' || true)
+  CURRENT_NODE=$(which node)
+  if [ -n "$PM2_NODE" ] && [ "$PM2_NODE" != "$CURRENT_NODE" ]; then
+    echo "→ PM2 is running under a different Node version, reinstalling..."
+    pm2 kill 2>/dev/null || true
+    NEED_PM2_INSTALL=true
+  fi
+fi
+
+if [ "$NEED_PM2_INSTALL" = true ]; then
   echo "→ Installing PM2 globally..."
   npm install -g pm2
-  echo "✓ PM2 installed"
+  echo "✓ PM2 installed (Node $(node -v))"
 fi
+
+# Kill any stale PM2 daemon that might be running under a wrong Node version.
+# PM2's daemon persists across shell sessions — if it was started by Node 24
+# and we're now on Node 20, the daemon will spawn children with Node 24.
+# `pm2 update` restarts the daemon under the current Node.
+pm2 update 2>/dev/null || true
 
 # ─── 5. Start or restart via PM2 ─────────────────────────────────────
 if pm2 describe devtodo >/dev/null 2>&1; then
