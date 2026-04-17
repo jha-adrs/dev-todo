@@ -56,15 +56,10 @@ curl -fsSL https://github.com/jha-adrs/dev-todo/releases/latest/download/devtodo
 cd devtodo-*-linux-arm64 && ./run.sh
 ```
 
-**macOS:**
+**macOS (Apple Silicon):**
 ```bash
-# Apple Silicon (M1/M2/M3/M4)
 curl -fsSL https://github.com/jha-adrs/dev-todo/releases/latest/download/devtodo-darwin-arm64.tar.gz | tar xz
 cd devtodo-*-darwin-arm64 && ./run.sh
-
-# Intel Mac
-curl -fsSL https://github.com/jha-adrs/dev-todo/releases/latest/download/devtodo-darwin-x64.tar.gz | tar xz
-cd devtodo-*-darwin-x64 && ./run.sh
 ```
 
 App starts on **http://localhost:3000**. First visit prompts you to create a password.
