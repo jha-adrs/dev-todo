@@ -106,17 +106,33 @@ Vite (5173) + Express (3000) with hot reload.
 
 ### Reverse proxy + HTTPS (Caddy, ~5 min)
 
+Install Caddy from the official repo (not `apt install caddy`, which gives an old version):
+
 ```bash
-sudo apt install caddy
-sudo tee /etc/caddy/Caddyfile <<EOF
+sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+sudo apt update && sudo apt install -y caddy
+```
+
+Edit `/etc/caddy/Caddyfile`:
+
+```
 your-domain.com {
     reverse_proxy localhost:3000
 }
-EOF
+
+# Add more apps on other subdomains — each gets its own cert automatically:
+# other-app.your-domain.com {
+#     reverse_proxy localhost:4000
+# }
+```
+
+```bash
 sudo systemctl restart caddy
 ```
 
-Caddy auto-provisions Let's Encrypt SSL. Done.
+Caddy auto-provisions Let's Encrypt SSL for each domain block. Add more `{}` blocks for additional subdomains.
 
 ### Updating
 
@@ -136,6 +152,25 @@ cd dev-todo && git pull && docker compose up -d --build
 
 Data persists in `./data` (SQLite) and `./uploads` (files) — or in Docker volumes if you used Docker.
 
+### Process management (PM2)
+
+`run.sh` auto-installs PM2 and starts DevTodo as a background process. Useful commands:
+
+```bash
+pm2 status              # see running processes
+pm2 logs devtodo        # tail logs
+pm2 restart devtodo     # restart after config change
+pm2 stop devtodo        # stop the app
+```
+
+To auto-start on reboot (run once):
+
+```bash
+pm2 startup
+# Follow the printed command, then:
+pm2 save
+```
+
 ## Configuration
 
 All via env vars (write to `.env`):
@@ -149,6 +184,8 @@ All via env vars (write to `.env`):
 | `TURSO_DATABASE_URL` | — | Required if `DB_PROVIDER=turso` |
 | `TURSO_AUTH_TOKEN` | — | Required if `DB_PROVIDER=turso` |
 | `STORAGE_PROVIDER` | `local` | `local` (filesystem) or `s3` (S3/R2) |
+| `LOG_LEVEL` | `info` | Log verbosity: `error`, `warn`, `info`, `http`, `debug` |
+| `ALLOWED_ORIGINS` | `*` | Comma-separated CORS origins. `*` allows all (mobile-app friendly). |
 | `S3_BUCKET` | — | Bucket name |
 | `S3_REGION` | `auto` | Region (`auto` for Cloudflare R2) |
 | `S3_ENDPOINT` | — | Custom endpoint (required for R2) |
