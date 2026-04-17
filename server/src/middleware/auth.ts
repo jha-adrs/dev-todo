@@ -4,19 +4,16 @@ import { logger } from "../lib/logger.js";
 
 const JWT_SECRET = (() => {
   const secret = process.env.JWT_SECRET;
-  if (!secret || secret === "changeme-generate-a-real-secret" || secret.length < 16) {
-    if (process.env.NODE_ENV === "production") {
-      logger.error("FATAL: JWT_SECRET is missing or too weak. Generate with: openssl rand -hex 32");
-      process.exit(1);
-    }
-    // Development: warn but generate a random one for this session
-    const random = Array.from({ length: 32 }, () =>
-      Math.floor(Math.random() * 256).toString(16).padStart(2, "0"),
-    ).join("");
-    logger.warn("JWT_SECRET not set, using ephemeral random secret (sessions won't survive restart)");
-    return random;
+  if (secret && secret !== "changeme-generate-a-real-secret" && secret.length >= 16) {
+    return secret;
   }
-  return secret;
+  // Auto-generate a random secret for this process lifetime.
+  // Sessions won't survive a server restart — set JWT_SECRET in .env for persistence.
+  const random = Array.from({ length: 32 }, () =>
+    Math.floor(Math.random() * 256).toString(16).padStart(2, "0"),
+  ).join("");
+  logger.warn("JWT_SECRET not set or too weak — using auto-generated secret (sessions reset on restart)");
+  return random;
 })();
 
 export interface AuthRequest extends Request {
