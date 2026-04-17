@@ -1,25 +1,19 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { logger } from "../lib/logger.js";
 
 const JWT_SECRET = (() => {
   const secret = process.env.JWT_SECRET;
   if (!secret || secret === "changeme-generate-a-real-secret" || secret.length < 16) {
     if (process.env.NODE_ENV === "production") {
-      console.error(
-        "\n[devtodo] FATAL: JWT_SECRET is missing or too weak.\n" +
-          "Generate a secure secret with: openssl rand -hex 32\n" +
-          "Set it in your .env file or environment.\n",
-      );
+      logger.error("FATAL: JWT_SECRET is missing or too weak. Generate with: openssl rand -hex 32");
       process.exit(1);
     }
     // Development: warn but generate a random one for this session
     const random = Array.from({ length: 32 }, () =>
       Math.floor(Math.random() * 256).toString(16).padStart(2, "0"),
     ).join("");
-    console.warn(
-      "[devtodo] WARNING: JWT_SECRET not set. Using ephemeral random secret (sessions won't survive restart).\n" +
-        "         Set JWT_SECRET in .env for persistent auth.",
-    );
+    logger.warn("JWT_SECRET not set, using ephemeral random secret (sessions won't survive restart)");
     return random;
   }
   return secret;

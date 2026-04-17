@@ -3,14 +3,15 @@ import { db } from "./index.js";
 import { spaces } from "./schema.js";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { logger } from "../lib/logger.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const migrationsFolder = path.resolve(__dirname, "../../drizzle");
 
 export function runMigrations() {
-  console.log("[devtodo] running migrations...");
+  logger.info("running migrations");
   migrate(db, { migrationsFolder });
-  console.log("[devtodo] migrations complete");
+  logger.info("migrations complete");
 
   // Seed default space if none exist
   const existing = db.select().from(spaces).all();
@@ -23,7 +24,7 @@ export function runMigrations() {
         sortOrder: 0,
       })
       .run();
-    console.log("[devtodo] seeded default Personal space");
+    logger.info("seeded default Personal space");
   }
 }
 
