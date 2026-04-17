@@ -3,7 +3,15 @@
 # Idempotent: safe to re-run after an upgrade. Preserves existing .env and data/.
 set -euo pipefail
 
-# ─── 1. Require Node.js 20+ ──────────────────────────────────────────
+# ─── 1. Load nvm and require Node.js 20+ ─────────────────────────────
+# If nvm is installed, load it and switch to Node 20 automatically.
+# This handles systems with multiple Node versions via nvm.
+export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+if [ -s "$NVM_DIR/nvm.sh" ]; then
+  . "$NVM_DIR/nvm.sh"
+  nvm use 20 --silent 2>/dev/null || nvm use default --silent 2>/dev/null || true
+fi
+
 if ! command -v node >/dev/null 2>&1; then
   echo "Error: Node.js not found."
   echo "Install Node 20+ (https://nodejs.org) and re-run ./run.sh"
@@ -13,6 +21,7 @@ fi
 NODE_MAJOR=$(node -v | sed 's/v//' | cut -d. -f1)
 if [ "$NODE_MAJOR" -lt 20 ]; then
   echo "Error: Node.js 20+ required. Current: $(node -v)"
+  echo "Hint: if using nvm, run: nvm install 20"
   exit 1
 fi
 
