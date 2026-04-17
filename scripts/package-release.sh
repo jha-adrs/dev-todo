@@ -77,12 +77,20 @@ echo "→ Creating tarball"
 # Use a deterministic-ish tar: sort entries, fixed mtime would need GNU tar extras.
 tar -czf "${TARBALL}" -C dist-release "${STAGING_NAME}"
 
+echo "→ Creating versionless copy for GitHub latest redirect"
+# GitHub's /releases/latest/download/<name> matches on exact filename.
+# The README uses the versionless name so it never goes stale.
+VERSIONLESS="dist-release/devtodo-${PLATFORM}.tar.gz"
+cp "${TARBALL}" "${VERSIONLESS}"
+
 echo "→ Computing SHA256"
 # Portable across Linux (sha256sum) and macOS (shasum -a 256)
 if command -v sha256sum >/dev/null 2>&1; then
   (cd dist-release && sha256sum "${STAGING_NAME}.tar.gz") > "${TARBALL}.sha256"
+  (cd dist-release && sha256sum "devtodo-${PLATFORM}.tar.gz") > "${VERSIONLESS}.sha256"
 else
   (cd dist-release && shasum -a 256 "${STAGING_NAME}.tar.gz") > "${TARBALL}.sha256"
+  (cd dist-release && shasum -a 256 "devtodo-${PLATFORM}.tar.gz") > "${VERSIONLESS}.sha256"
 fi
 
 echo ""

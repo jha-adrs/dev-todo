@@ -52,6 +52,8 @@ jobs:
           path: |
             dist-release/devtodo-${{ github.ref_name }}-${{ matrix.platform }}.tar.gz
             dist-release/devtodo-${{ github.ref_name }}-${{ matrix.platform }}.tar.gz.sha256
+            dist-release/devtodo-${{ matrix.platform }}.tar.gz
+            dist-release/devtodo-${{ matrix.platform }}.tar.gz.sha256
           if-no-files-found: error
           retention-days: 7
 
