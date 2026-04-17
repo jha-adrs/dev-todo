@@ -1,7 +1,10 @@
 import winston from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
+import path from "node:path";
+import os from "node:os";
 
 const isProduction = process.env.NODE_ENV === "production";
+const logsDir = path.join(os.homedir(), ".devtodo", "logs");
 
 const consoleFormat = isProduction
   ? winston.format.combine(
@@ -23,7 +26,7 @@ const fileFormat = winston.format.combine(
 );
 
 const appRotateTransport = new DailyRotateFile({
-  filename: "logs/app-%DATE%.log",
+  filename: path.join(logsDir, "app-%DATE%.log"),
   datePattern: "YYYY-MM-DD",
   maxSize: "20m",
   maxFiles: "30d",
@@ -32,7 +35,7 @@ const appRotateTransport = new DailyRotateFile({
 });
 
 const errorRotateTransport = new DailyRotateFile({
-  filename: "logs/error-%DATE%.log",
+  filename: path.join(logsDir, "error-%DATE%.log"),
   datePattern: "YYYY-MM-DD",
   maxSize: "20m",
   maxFiles: "30d",

@@ -25,27 +25,53 @@ if [ "$NODE_MAJOR" -lt 20 ]; then
   exit 1
 fi
 
-# ─── 2. Generate .env on first run ───────────────────────────────────
+# ─── 2. Setup data directory at ~/.devtodo ────────────────────────────
+# All persistent data lives in ~/.devtodo/ so upgrades never lose data.
+# The install directory only contains code — fully disposable.
+DEVTODO_HOME="${HOME}/.devtodo"
+mkdir -p "${DEVTODO_HOME}/data" "${DEVTODO_HOME}/uploads" "${DEVTODO_HOME}/logs"
+
+# Migrate data from old in-place installs (data/, uploads/, .env in the install dir)
+if [ -f ./data/devtodo.db ] && [ ! -f "${DEVTODO_HOME}/data/devtodo.db" ]; then
+  echo "→ Migrating data from ./data/ to ${DEVTODO_HOME}/data/"
+  cp -r ./data/* "${DEVTODO_HOME}/data/"
+  echo "✓ Database migrated"
+fi
+if [ -d ./uploads ] && [ "$(ls -A ./uploads 2>/dev/null)" ] && [ ! "$(ls -A "${DEVTODO_HOME}/uploads" 2>/dev/null)" ]; then
+  echo "→ Migrating uploads to ${DEVTODO_HOME}/uploads/"
+  cp -r ./uploads/* "${DEVTODO_HOME}/uploads/"
+  echo "✓ Uploads migrated"
+fi
+
+# ─── 3. Generate .env on first run ───────────────────────────────────
 if [ ! -f .env ]; then
-  if command -v openssl >/dev/null 2>&1; then
-    JWT_SECRET=$(openssl rand -hex 32)
+  # Check if old .env exists in ~/.devtodo from a previous install
+  if [ -f "${DEVTODO_HOME}/.env" ]; then
+    cp "${DEVTODO_HOME}/.env" .env
+    echo "✓ Restored .env from ${DEVTODO_HOME}/"
   else
-    JWT_SECRET=$(head -c 64 /dev/urandom | od -An -tx1 | tr -d ' \n')
-  fi
-  cat > .env <<EOF
+    if command -v openssl >/dev/null 2>&1; then
+      JWT_SECRET=$(openssl rand -hex 32)
+    else
+      JWT_SECRET=$(head -c 64 /dev/urandom | od -An -tx1 | tr -d ' \n')
+    fi
+    cat > .env <<EOF
 JWT_SECRET=${JWT_SECRET}
 PORT=3000
 DB_PROVIDER=sqlite
-DB_PATH=./data/devtodo.db
+DB_PATH=${DEVTODO_HOME}/data/devtodo.db
 STORAGE_PROVIDER=local
+UPLOADS_PATH=${DEVTODO_HOME}/uploads
 LOG_LEVEL=info
 ALLOWED_ORIGINS=*
 EOF
-  echo "✓ Generated .env with random JWT secret"
+    echo "✓ Generated .env with random JWT secret"
+    echo "  Data directory: ${DEVTODO_HOME}/"
+  fi
 fi
 
-# ─── 3. Ensure runtime directories exist ─────────────────────────────
-mkdir -p data uploads logs
+# Always keep a backup of .env in ~/.devtodo for next upgrade
+cp .env "${DEVTODO_HOME}/.env" 2>/dev/null || true
 
 # ─── 4. Ensure PM2 is available under the correct Node ──────────────
 # PM2 must be installed under the same Node version that will run the app.

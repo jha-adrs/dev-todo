@@ -5,7 +5,9 @@ import type { StorageProvider } from "./index.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, "../../..");
-const UPLOADS_DIR = path.resolve(PROJECT_ROOT, "uploads");
+const UPLOADS_DIR = process.env.UPLOADS_PATH
+  ? path.resolve(process.env.UPLOADS_PATH)
+  : path.resolve(PROJECT_ROOT, "uploads");
 
 export class LocalStorage implements StorageProvider {
   constructor() {

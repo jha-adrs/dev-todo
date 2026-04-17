@@ -66,7 +66,10 @@ app.get("/api/health", (_req, res) => {
 });
 
 // Static file serving for uploads
-app.use("/uploads", express.static(path.resolve(PROJECT_ROOT, "uploads")));
+const uploadsDir = process.env.UPLOADS_PATH
+  ? path.resolve(process.env.UPLOADS_PATH)
+  : path.resolve(PROJECT_ROOT, "uploads");
+app.use("/uploads", express.static(uploadsDir));
 
 // Auth routes (rate-limited)
 app.use("/api/auth", authLimiter, authRouter);

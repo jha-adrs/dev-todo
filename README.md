@@ -183,6 +183,26 @@ pm2 startup
 pm2 save
 ```
 
+## Data Storage
+
+All persistent data lives in `~/.devtodo/` (your home directory), separate from the install:
+
+```
+~/.devtodo/
+├── data/devtodo.db    # SQLite database (todos, notes, spaces, tags)
+├── uploads/           # File attachments
+├── logs/              # Application + PM2 logs
+└── .env               # Backup of your config (auto-copied on each run)
+```
+
+**This means upgrades are safe** — download a new release, extract anywhere, run `./run.sh`. Your data, uploads, and config are untouched.
+
+To back up everything: `cp -r ~/.devtodo ~/devtodo-backup`
+
+To reset completely: `rm -rf ~/.devtodo` (next `./run.sh` starts fresh)
+
+> **Migrating from an older version:** If you have `data/`, `uploads/`, or `.env` in the install directory from a pre-v1.3 install, `run.sh` automatically detects and migrates them to `~/.devtodo/` on first run.
+
 ## Configuration
 
 All via env vars (write to `.env`):
@@ -192,10 +212,11 @@ All via env vars (write to `.env`):
 | `JWT_SECRET` | _generated_ | Secret for JWT tokens. `setup.sh` auto-generates one. |
 | `PORT` | `3000` | Server port |
 | `DB_PROVIDER` | `sqlite` | `sqlite` (local file) or `turso` (cloud) |
-| `DB_PATH` | `./data/devtodo.db` | SQLite file path |
+| `DB_PATH` | `~/.devtodo/data/devtodo.db` | SQLite file path |
 | `TURSO_DATABASE_URL` | — | Required if `DB_PROVIDER=turso` |
 | `TURSO_AUTH_TOKEN` | — | Required if `DB_PROVIDER=turso` |
 | `STORAGE_PROVIDER` | `local` | `local` (filesystem) or `s3` (S3/R2) |
+| `UPLOADS_PATH` | `~/.devtodo/uploads` | Local upload directory path |
 | `LOG_LEVEL` | `info` | Log verbosity: `error`, `warn`, `info`, `http`, `debug` |
 | `ALLOWED_ORIGINS` | `*` | Comma-separated CORS origins. `*` allows all (mobile-app friendly). |
 | `S3_BUCKET` | — | Bucket name |
