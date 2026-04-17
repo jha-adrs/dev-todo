@@ -43,10 +43,10 @@
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.2);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.3);
-  --shadow-xl: 0 20px 60px rgba(0,0,0,0.4);
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.18);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.28);
+  --shadow-lg: 0 8px 28px rgba(0,0,0,0.38);
+  --shadow-xl: 0 20px 64px rgba(0,0,0,0.5);
 
   /* Type scale */
   --text-xs: 10px;
@@ -131,6 +131,102 @@
   --text-dim: #586e75;
 }
 
+.catppuccin {
+  --bg: #1e1e2e;
+  --bg-card: #181825;
+  --bg-elevated: #313244;
+  --border: #45475a;
+  --border-light: #383a4e;
+  --text-primary: #cdd6f4;
+  --text-secondary: #bac2de;
+  --text-muted: #6c7086;
+  --text-dim: #585b70;
+}
+
+.dracula {
+  --bg: #282a36;
+  --bg-card: #21222c;
+  --bg-elevated: #343746;
+  --border: #44475a;
+  --border-light: #3b3d50;
+  --text-primary: #f8f8f2;
+  --text-secondary: #e2e2dc;
+  --text-muted: #6272a4;
+  --text-dim: #565761;
+}
+
+.tokyonight {
+  --bg: #1a1b26;
+  --bg-card: #16161e;
+  --bg-elevated: #232433;
+  --border: #292e42;
+  --border-light: #222639;
+  --text-primary: #a9b1d6;
+  --text-secondary: #9aa5ce;
+  --text-muted: #565f89;
+  --text-dim: #414868;
+}
+
+.gruvbox {
+  --bg: #282828;
+  --bg-card: #1d2021;
+  --bg-elevated: #3c3836;
+  --border: #504945;
+  --border-light: #45403d;
+  --text-primary: #ebdbb2;
+  --text-secondary: #d5c4a1;
+  --text-muted: #928374;
+  --text-dim: #7c6f64;
+}
+
+.onedark {
+  --bg: #282c34;
+  --bg-card: #21252b;
+  --bg-elevated: #2c313a;
+  --border: #3e4452;
+  --border-light: #353b45;
+  --text-primary: #abb2bf;
+  --text-secondary: #9da5b4;
+  --text-muted: #636d83;
+  --text-dim: #4b5263;
+}
+
+.githubdark {
+  --bg: #0d1117;
+  --bg-card: #161b22;
+  --bg-elevated: #1c2128;
+  --border: #30363d;
+  --border-light: #262c33;
+  --text-primary: #c9d1d9;
+  --text-secondary: #b1bac4;
+  --text-muted: #8b949e;
+  --text-dim: #6e7681;
+}
+
+.ayulight {
+  --bg: #fafafa;
+  --bg-card: #ffffff;
+  --bg-elevated: #f3f4f5;
+  --border: #e7e8e9;
+  --border-light: #eff0f1;
+  --text-primary: #5c6166;
+  --text-secondary: #787b80;
+  --text-muted: #8a9199;
+  --text-dim: #acb6bf;
+}
+
+.everforest {
+  --bg: #2d353b;
+  --bg-card: #272e33;
+  --bg-elevated: #343f44;
+  --border: #475258;
+  --border-light: #3d484d;
+  --text-primary: #d3c6aa;
+  --text-secondary: #c5b899;
+  --text-muted: #859289;
+  --text-dim: #6e7f77;
+}
+
 /* ═══ GLOBAL ═══ */
 
 * {
@@ -159,6 +255,11 @@ input:focus-visible, textarea:focus-visible, button:focus-visible {
 }
 
 /* Scrollbar */
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: var(--radius-sm); }

@@ -7,43 +7,54 @@ interface ProgressRingProps {
 export default function ProgressRing({ completed, total, backlogCount }: ProgressRingProps) {
   if (total === 0 && backlogCount === 0) return null;
 
-  const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const pct = total > 0 ? completed / total : 0;
+  const percentage = Math.round(pct * 100);
   const radius = 26;
+  const stroke = 3;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (percentage / 100) * circumference;
+  const offset = circumference * (1 - pct);
   const remaining = total - completed;
+
+  // Color transitions: red/primary (<30%) → amber (<70%) → green (≥70%)
+  const ringColor =
+    pct >= 0.7
+      ? "var(--color-green)"
+      : pct >= 0.3
+      ? "var(--color-amber)"
+      : "var(--color-primary)";
+
+  const svgSize = radius * 2 + stroke * 2;
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
       {/* SVG ring */}
-      <div style={{ position: "relative", width: "64px", height: "64px", flexShrink: 0 }}>
+      <div style={{ position: "relative", width: svgSize + "px", height: svgSize + "px", flexShrink: 0 }}>
         <svg
-          width="64"
-          height="64"
-          viewBox="0 0 64 64"
+          width={svgSize}
+          height={svgSize}
           style={{ transform: "rotate(-90deg)" }}
         >
           {/* Background track */}
           <circle
-            cx="32"
-            cy="32"
+            cx={radius + stroke}
+            cy={radius + stroke}
             r={radius}
             fill="none"
             stroke="var(--border)"
-            strokeWidth="3"
+            strokeWidth={stroke}
           />
           {/* Progress arc */}
           <circle
-            cx="32"
-            cy="32"
+            cx={radius + stroke}
+            cy={radius + stroke}
             r={radius}
             fill="none"
-            stroke={percentage === 100 ? "var(--color-green)" : "var(--color-primary)"}
-            strokeWidth="3"
+            stroke={ringColor}
+            strokeWidth={stroke}
             strokeDasharray={circumference}
             strokeDashoffset={offset}
             strokeLinecap="round"
-            style={{ transition: "stroke-dashoffset 0.5s ease, stroke 0.3s" }}
+            style={{ transition: "stroke-dashoffset 0.5s ease, stroke 0.3s ease" }}
           />
         </svg>
         {/* Center text */}
@@ -59,8 +70,8 @@ export default function ProgressRing({ completed, total, backlogCount }: Progres
           <span
             style={{
               fontFamily: "var(--font-mono)",
-              fontSize: "13px",
-              fontWeight: 700,
+              fontSize: "11px",
+              fontWeight: 600,
               color: "var(--text-primary)",
             }}
           >
@@ -89,33 +100,6 @@ export default function ProgressRing({ completed, total, backlogCount }: Progres
           }}
         >
           {remaining} remaining // {backlogCount} backlog
-        </div>
-        {/* Dot indicators */}
-        <div style={{ display: "flex", gap: "3px", marginTop: "6px" }}>
-          {Array.from({ length: total }).map((_, i) => (
-            <div
-              key={i}
-              style={{
-                width: "7px",
-                height: "7px",
-                borderRadius: "2px",
-                backgroundColor:
-                  i < completed ? "var(--color-green)" : "var(--color-primary)",
-                transition: "background-color 0.3s",
-              }}
-            />
-          ))}
-          {Array.from({ length: backlogCount }).map((_, i) => (
-            <div
-              key={`b-${i}`}
-              style={{
-                width: "7px",
-                height: "7px",
-                borderRadius: "2px",
-                backgroundColor: "var(--color-amber)",
-              }}
-            />
-          ))}
         </div>
       </div>
     </div>
