@@ -29,12 +29,35 @@ PORT=3000
 DB_PROVIDER=sqlite
 DB_PATH=./data/devtodo.db
 STORAGE_PROVIDER=local
+LOG_LEVEL=info
+ALLOWED_ORIGINS=*
 EOF
   echo "✓ Generated .env with random JWT secret"
 fi
 
 # ─── 3. Ensure runtime directories exist ─────────────────────────────
-mkdir -p data uploads
+mkdir -p data uploads logs
 
-# ─── 4. Exec the server (migrations run automatically on startup) ────
-exec node server/dist/index.js
+# ─── 4. Ensure PM2 is available ──────────────────────────────────────
+if ! command -v pm2 >/dev/null 2>&1; then
+  echo "→ Installing PM2 globally..."
+  npm install -g pm2
+  echo "✓ PM2 installed"
+fi
+
+# ─── 5. Start or restart via PM2 ─────────────────────────────────────
+if pm2 describe devtodo >/dev/null 2>&1; then
+  pm2 restart devtodo
+  echo "✓ DevTodo restarted"
+else
+  pm2 start ecosystem.config.js
+  echo "✓ DevTodo started via PM2"
+fi
+
+pm2 save
+
+echo ""
+echo "  DevTodo is running at http://0.0.0.0:${PORT:-3000}"
+echo "  Logs:   pm2 logs devtodo"
+echo "  Status: pm2 status"
+echo "  Stop:   pm2 stop devtodo"
